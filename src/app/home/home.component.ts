@@ -22,8 +22,9 @@ import {toObservable, toSignal, outputToObservable, outputFromObservable} from "
 export class HomeComponent {
   //Advantages of using signals: Improved change detection, better performance, and more predictable behavior.
   counter = signal(0);
+  reader = signal(10).asReadonly();
 
   increment(): void {
-    this.counter.set(this.counter() + 1);
+    this.counter.update(counter => counter + 1);
   }
 }
