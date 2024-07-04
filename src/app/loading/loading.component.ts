@@ -10,7 +10,6 @@ import {LoadingService} from "./loading.service";
   standalone: true,
 })
 export class LoadingIndicatorComponent {
-
-
-
+  loadingService = inject(LoadingService);
+  loading = this.loadingService.loading;
 }
