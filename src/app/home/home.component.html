@@ -1,30 +1,19 @@
 <div class="courses-panel">
 
-  <h3>All Courses: {{counter()}}</h3>
+  <h3>All Courses</h3>
 
   <button class="btn">
     Add Course
   </button>
 
-  <button class="btn" (click)="increment()" >
-    Increment
-  </button>
-
-  <button class="btn" (click)="manualCleanUpEffect()">
-    Manual Clean Up Effect
-  </button>
-
   <mat-tab-group>
 
     <mat-tab label="Beginners">
-
-
-
+      <courses-card-list [data]="beginnerCourses()" />
     </mat-tab>
 
     <mat-tab label="Advanced">
-
-
+      <courses-card-list [data]="advancedCourses()" />
     </mat-tab>
 
   </mat-tab-group>

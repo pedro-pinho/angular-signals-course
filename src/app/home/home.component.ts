@@ -19,50 +19,29 @@ import {toObservable, toSignal, outputToObservable, outputFromObservable} from "
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-  //Advantages of using signals: Improved change detection, better performance, and more predictable behavior.
-  counter = signal(0);
-  effectRef: EffectRef | null = null;
-  injector = inject(Injector);
+  #courses = signal<Course[]>([]);
+  coursesService = inject(CoursesService);
+
+  beginnerCourses = computed(() => {
+    const courses = this.#courses();
+    return courses.filter(course => course.category === 'BEGINNER')
+  });
+  advancedCourses = computed(() => {
+    const courses = this.#courses();
+    return courses.filter(course => course.category === 'ADVANCED')
+  });
 
   constructor() {
-    //The best place to create effects is in the constructor of a component or service.
-    //Effects are automatically cleaned up when the component or service is destroyed.
-    //! Do not overuse effects, as they can make the code harder to understand.
-    this.effectRef = effect((onCleanup) => {
-      const counter = this.counter();
-      const timeout = setTimeout(() => {
-        console.log('Counter value:', counter);
-      }, 2000);
-      //Writing to signals is not allowed inside effects by default.
-      // This is to prevent infinite loops and other side effects.
-      // If write to a signal is an absolute must inside an effect, you can use allowSignalWrites: true.
-      onCleanup(() => {
-        console.log('Cleaning up effect');
-        clearTimeout(timeout);
-      });
-    }, {
-      allowSignalWrites: false
-    });
-
-    afterNextRender(() => {
-      // If we need to define an effect that depends on a value that is not available when the component is created,
-      // we can use afterNextRender, or on some other part of the code, to ensure that the effect is executed after the first render.
-      // But then we need to use an injector to tell angular when to do the cleanup.
-      effect(() => {
-        console.log('Other counter value:', this.counter());
-      }, {
-        injector: this.injector
-      });
-    });
+    this.loadCourses();
   }
 
-  manualCleanUpEffect() {
-    //If we need to manually clean up an effect, we can call the cleanup function that the effect returns.
-    //This is useful when we need to clean up resources that are not automatically cleaned up by the framework.
-    this.effectRef?.destroy();
-  }
-
-  increment(): void {
-    this.counter.update(val => (val + 1));
+  async loadCourses() {
+    try {
+      const courses = await this.coursesService.loadAllCourses();
+      this.#courses.set(courses.sort(sortCoursesBySeqNo));
+    } catch (error) {
+      alert("Error loading courses");
+      console.error(error);
+    }
   }
 }
