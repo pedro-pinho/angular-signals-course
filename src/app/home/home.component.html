@@ -1,6 +1,6 @@
 <div class="courses-panel">
 
-  <h3>All Courses: {{counter()}}</h3>
+  <h3>All Courses: {{counter().value}} / {{values().join(', ')}}</h3>
 
   <button class="btn">
     Add Course
@@ -8,6 +8,10 @@
 
   <button class="btn" (click)="increment()" >
     Increment
+  </button>
+
+  <button class="btn" (click)="appendValue()" >
+    Append
   </button>
 
   <mat-tab-group>
