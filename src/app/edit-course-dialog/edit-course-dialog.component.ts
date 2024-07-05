@@ -8,6 +8,7 @@ import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {CourseCategoryComboboxComponent} from "../course-category-combobox/course-category-combobox.component";
 import {CourseCategory} from "../models/course-category.model";
 import { firstValueFrom } from 'rxjs';
+import { MessagesService } from '../messages/messages.service';
 
 @Component({
   selector: 'edit-course-dialog',
@@ -25,6 +26,7 @@ export class EditCourseDialogComponent {
   data: EditCourseDialogData = inject(MAT_DIALOG_DATA);
   fb = inject(FormBuilder);
   courseService = inject(CoursesService);
+  messageServices = inject(MessagesService);
   form = this.fb.group({
     title: [''],
     longDescription: [''],
@@ -47,7 +49,6 @@ export class EditCourseDialogComponent {
 
   async onSave() {
     const courseProps = this.form.value as Partial<Course>;
-    let response;
     if (this.data.mode === 'update') {
       await this.saveCourse(this.data.course!.id, courseProps);
     } else if (this.data?.mode === "create") {
@@ -58,20 +59,22 @@ export class EditCourseDialogComponent {
   async saveCourse(courseId: string, changes: Partial<Course>) {
     try {
       const updatedCourse = await this.courseService.saveCourse(courseId, changes);
+      this.messageServices.showMessage('Course saved successfully.', 'success');
       this.dialogRef.close(updatedCourse);
     } catch (error) {
+      this.messageServices.showMessage('Error saving the course.', 'error');
       console.error(error);
-      alert("Error saving the course.");
     }
   }
 
   async createCourse(course: Partial<Course>) {
     try {
       const newCourse = await this.courseService.createCourse(course);
+      this.messageServices.showMessage('Course created successfully.', 'success');
       this.dialogRef.close(newCourse);
     } catch (err) {
       console.error(err);
-      alert(`Error creating the course.`)
+      this.messageServices.showMessage('Error creating the course.', 'error');
     }
   }
 

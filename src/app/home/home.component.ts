@@ -23,6 +23,7 @@ export class HomeComponent {
   #courses = signal<Course[]>([]);
   coursesService = inject(CoursesService);
   dialog = inject(MatDialog);
+  messageServices = inject(MessagesService);
 
   beginnerCourses = computed(() => {
     const courses = this.#courses();
@@ -42,7 +43,7 @@ export class HomeComponent {
       const courses = await this.coursesService.loadAllCourses();
       this.#courses.set(courses.sort(sortCoursesBySeqNo));
     } catch (error) {
-      alert("Error loading courses");
+      this.messageServices.showMessage('Failed to load courses', 'error');
       console.error(error);
     }
   }
@@ -60,9 +61,10 @@ export class HomeComponent {
     const newCourses = courses.filter(course => course.id !== deletedCourseId);
     try {
       await this.coursesService.deleteCourse(deletedCourseId);
+      this.messageServices.showMessage('Course deleted successfully', 'success');
       this.#courses.set(newCourses);
     } catch (error) {
-      alert("Error deleting course");
+      this.messageServices.showMessage('Error deleting course', 'error');
       console.error(error);
     }
   }
