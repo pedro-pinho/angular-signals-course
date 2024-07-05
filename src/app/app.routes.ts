@@ -2,11 +2,13 @@ import {Routes} from '@angular/router';
 import {HomeComponent} from "./home/home.component";
 import {LoginComponent} from "./login/login.component";
 import {LessonsComponent} from "./lessons/lessons.component";
+import { isUserAuthenticated } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    component: HomeComponent
+    component: HomeComponent,
+    canActivate: [isUserAuthenticated]
   },
   {
     path: "login",
@@ -14,7 +16,8 @@ export const routes: Routes = [
   },
   {
     path: "lessons",
-    component: LessonsComponent
+    component: LessonsComponent,
+    canActivate: [isUserAuthenticated]
   },
   {
     path: '**',
