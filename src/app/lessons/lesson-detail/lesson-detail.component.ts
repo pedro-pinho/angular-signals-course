@@ -14,7 +14,8 @@ import {MessagesService} from "../../messages/messages.service";
   styleUrl: './lesson-detail.component.scss'
 })
 export class LessonDetailComponent {
-
+  lesson = input.required<Lesson | null>();
+  lessonUpdated = output<Lesson>();
 
 
 }
