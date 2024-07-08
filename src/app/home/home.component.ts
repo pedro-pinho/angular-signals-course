@@ -16,7 +16,7 @@ import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { CoursesCardListComponent } from '../courses-card-list/courses-card-list.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MessagesService } from '../messages/messages.service';
-import { catchError, from, throwError } from 'rxjs';
+import { catchError, from, interval, startWith, throwError } from 'rxjs';
 import {
   toObservable,
   toSignal,
@@ -36,8 +36,9 @@ export class HomeComponent {
   coursesService = inject(CoursesService);
   dialog = inject(MatDialog);
   messageServices = inject(MessagesService);
+  injector = inject(Injector);
   beginnersList = viewChild('beginnersList', {
-    read: ElementRef
+    read: ElementRef,
   });
 
   beginnerCourses = computed(() => {
@@ -49,11 +50,64 @@ export class HomeComponent {
     return courses.filter((course) => course.category === 'ADVANCED');
   });
 
+  courses$ = from(this.coursesService.loadAllCourses());
+
+  // toObservable can only be used withing an injection context such as a constructor, a factory function, a field initializer or a function used within runInjectionContext
+  // Other way to avoid errors is to pass a second argument to the toObservable function, like this: injector = inject(Injector); toObservable(this.#courses, { injector: this.injector })
+  // Internally, toObservable uses `effect` to subscribe to the signal and return its values over time
+
+  toObservableExample() {
+    // In this example, only the number 5 will be printed to the console
+    const numbers = signal<number>(0);
+    numbers.set(1);
+    numbers.set(2);
+    numbers.set(3);
+    const numbers$ = toObservable(numbers, { injector: this.injector });
+    numbers.set(4);
+    numbers$.subscribe((number) => {
+      console.log('Number:', number);
+    });
+    numbers.set(5);
+  }
+
+  toSignalExample() {
+    const numbers$ = interval(1000).pipe(startWith(0));
+    const numbers = toSignal(numbers$, {
+      injector: this.injector, //this is to avoid memory leaks when the component gets destroyed, angular needs to clean this up
+      requireSync: true, // this is to make sure that the signal is always in sync with the observable
+    });
+    effect(
+      () => {
+        console.log('Numbers:', numbers());
+      },
+      { injector: this.injector }
+    );
+  }
+
+  toSignalsExampleWithError() {
+    try {
+      const courses$ = from(this.coursesService.loadAllCourses()).pipe(
+        catchError((error) => {
+          console.log('Error caught in the catchError', error);
+          throw error;
+        })
+      );
+      const courses = toSignal(courses$, {
+        injector: this.injector,
+      });
+      effect(
+        () => {
+          console.log('Courses:', courses());
+        },
+        { injector: this.injector }
+      );
+    } catch (error) {
+      console.log('Error in the catch block', error);
+    }
+  }
+
   constructor() {
     this.loadCourses();
-    effect(() => {
-      console.log('Beginner list:', this.beginnersList());
-    });
   }
 
   async loadCourses() {

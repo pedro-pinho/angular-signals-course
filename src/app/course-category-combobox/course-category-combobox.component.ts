@@ -13,12 +13,6 @@ export class CourseCategoryComboboxComponent {
 
   title = contentChild.required<ElementRef>('title'); //Content projection
 
-  constructor() {
-    effect(() => {
-      console.log('Category title:', this.title());
-    });
-  }
-
   onCategoryChange(category: string) {
     this.value.set(category as CourseCategory);
   }

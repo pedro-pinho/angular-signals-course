@@ -32,12 +32,6 @@ export class CoursesCardListComponent {
     read: ElementRef,
   });
 
-  constructor() {
-    effect(() => {
-      console.log('Courses card:', this.courseCards());
-    });
-  }
-
   async onEditCourse(course: Course) {
     const editedCourse = await openEditCourseDialog(this.dialog, {
       mode: 'update',
